@@ -14,6 +14,9 @@ class Set(object):
         self.cur_len = 0
         self.max_len = max_len
 
+    def Init(self, max):
+        self.sparse = [None] * max
+
     def Reset(self):
         self.cur_len = 0
 
@@ -46,7 +49,7 @@ if __name__ == "__main__":
     myset = Set(10)
     myset.Add(5)
     myset.Add(1)
-    myset.Add(4)
+    myset.Add(40)
     logging.info(myset.Dense())
     logging.info(myset.Len())
     logging.info(myset.sparse)
