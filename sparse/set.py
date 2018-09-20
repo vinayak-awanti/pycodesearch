@@ -1,5 +1,8 @@
 # A Set is a sparse set of integer values.
 # http://research.swtch.com/2008/03/using-uninitialized-memory-for-fun-and.html
+import logging 
+
+logging.basicConfig(level = "INFO")
 
 class Set(object):
 	"""Implementation of Sparse Set"""
@@ -18,13 +21,13 @@ class Set(object):
 			self.sparse[x] = self.cur_len
 			self.cur_len += 1
 		else:
-			print("Error inserted element out of range")
+			logging.info("Error inserted element out of range")
 
 	def Has(self, x):
 		if(x < self.max_len):
 			return self.sparse[x] < self.max_len and self.dense[self.sparse[x]] == x
 		else:
-			print("Error searched element out of range")
+			logging.info("Error searched element out of range")
 
 	def Len(self):
 		return self.cur_len
@@ -38,6 +41,6 @@ if __name__ == "__main__":
 	myset.Add(5)
 	myset.Add(1)
 	myset.Add(4)
-	print(myset.Dense())
-	print(myset.Len())
-	print(myset.sparse)
+	logging.info(myset.Dense())
+	logging.info(myset.Len())
+	logging.info(myset.sparse)
