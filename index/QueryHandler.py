@@ -6,20 +6,20 @@ class QueryHandler:
     self.index, self.files = index_handler.read()
 
   # returns intersection of posting lists of the given trigrams
-  def list_and(self, tri1, tri2):
+  def list_and(self, lst1, tri):
     i, j = 0, 0
-    list1, list2, list3 = self.index[tri1], self.index[tri2], []
-    n, m = len(list1), len(list2)
+    lst2, lst3 = self.index[tri], []
+    n, m = len(lst1), len(lst2)
     while i < n and j < m:
-      if list1[i] < list2[j]:
+      if lst1[i] < lst2[j]:
         i += 1
-      elif list1[i] > list2[j]:
+      elif lst1[i] > lst2[j]:
         j += 1
       else:
-        list3.append(list1[i])
+        lst3.append(lst1[i])
         i += 1
         j += 1
-    return list3
+    return lst3
 
   # returns union of posting lists of the given trigrams
   def list_or(self, lst1, tri):
@@ -48,5 +48,5 @@ class QueryHandler:
 
 query_handler = QueryHandler()
 
-print(query_handler.list_or([0,2], 'oog'))
-print(query_handler.list_and('asf', 'yae'))
+print(query_handler.list_or([0, 2], 'oog'))
+print(query_handler.list_and([0, 2], 'Goo'))
