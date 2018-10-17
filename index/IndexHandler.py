@@ -19,8 +19,9 @@ class IndexHandler:
     start_time = datetime.now()
     for root, _, files in os.walk(dir):
       for file in files:
-        self.add_file(os.path.join(root, file))
-      self.files.extend(files)
+        file = os.path.join(root, file)
+        self.add_file(file)
+        self.files.append(file)
     logging.info("index created %s", str(datetime.now() - start_time))
     with open(self.index_file, "wb") as fp:
       pickle.dump((self.index, self.files), fp)
