@@ -45,4 +45,4 @@ class IndexHandler:
 if __name__ == "__main__":
   index_handler = IndexHandler()
   index_handler.build("gcs")
-  print(index_handler.read())
+  logging.info(index_handler.read())

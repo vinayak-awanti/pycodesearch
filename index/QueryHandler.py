@@ -1,4 +1,7 @@
 from IndexHandler import IndexHandler
+import logging
+
+logging.basicConfig(level="INFO")
 
 class QueryHandler:
   def __init__(self):
@@ -42,11 +45,22 @@ class QueryHandler:
       lst3.extend(lst1[i:])
     if(j < m):
       lst3.append(lst2[j:])
-    
-    return lst3      
+    return lst3  
+
+  # returns candiate filenames
+  def query(self, tri_query):
+    lst = self.index[tri_query[0]]
+    for i in range(1,len(tri_query),2):
+      if(tri_query[i] == '&'):
+        lst = self.list_and(lst, tri_query[i+1])
+      else:
+        lst = self.list_or(lst, tri_query[i+1])
+    filenames = list(map(lambda x : self.files[x], lst))
+    return filenames
 
 
-query_handler = QueryHandler()
-
-print(query_handler.list_or([0, 2], 'oog'))
-print(query_handler.list_and([0, 2], 'Goo'))
+if __name__ == '__main__':
+  query_handler = QueryHandler()
+  logging.info(query_handler.list_or([0, 2], 'oog'))
+  logging.info(query_handler.list_and([0, 2], 'Goo'))
+  logging.info(query_handler.query(['Goo']))
