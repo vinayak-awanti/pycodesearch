@@ -3,7 +3,7 @@ from IndexHandler import IndexHandler
 class QueryHandler:
   def __init__(self):
     index_handler = IndexHandler()
-    self.index = index_handler.read()
+    self.index, self.files = index_handler.read()
 
   # returns intersection of posting lists of the given trigrams
   def list_and(self, tri1, tri2):
@@ -22,29 +22,31 @@ class QueryHandler:
     return list3
 
   # returns union of posting lists of the given trigrams
-  def list_or(self, tri1, tri2):
+  def list_or(self, lst1, tri):
     i, j = 0, 0
-    list1, list2,list3 = self.index[tri1], self.index[tri2], []
-    n, m = len(list1), len(list2)
+    n, lst2, lst3 = len(lst1), self.index[tri], []
+    m = len(lst2)
     while(i < n and j < m):
-      x, y = list1[i], list2[j]
+      x, y = lst1[i], lst2[j]
       if(x == y):
-        list3.append(x)
+        lst3.append(x)
         i += 1
         j += 1
       elif(x < y):
-        list3.append(x)
+        lst3.append(x)
         i += 1
       else:
-        list3.append(y)
+        lst3.append(y)
         j += 1
     if(i < n):
-      list3.extend(list1[i:])
+      lst3.extend(lst1[i:])
     if(j < m):
-      list3.append(list2[j:])
-    return list3
+      lst3.append(lst2[j:])
+    
+    return lst3      
+
 
 query_handler = QueryHandler()
 
-print(query_handler.list_or('asf', 'yae'))
+print(query_handler.list_or([0,2], 'oog'))
 print(query_handler.list_and('asf', 'yae'))
