@@ -1,0 +1,4 @@
+index/__pycache__/IndexHandler.cpython-36.pyc
+index/__pycache__/QueryHandler.cpython-36.pyc
+search/__pycache__/QueryBuilder.cpython-36.pyc
+search/__pycache__/RegexHandler.cpython-36.pyc
