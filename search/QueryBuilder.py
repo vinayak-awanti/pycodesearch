@@ -58,8 +58,7 @@ def get_query(tree):
         if n < 3:
             return Query(QueryType.QAll)
         tri = set()
-        for i in range(n - 3):
+        for i in range(n - 2):
             tri.add(s[i:i+3])
-        tri.add(s[n-3:n])
         sub += [Query(QueryType.QAnd, tri=tri)]
     return Query(QueryType.QOr, sub=sub)
