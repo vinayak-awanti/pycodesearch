@@ -2,7 +2,7 @@ import ply.lex as lex
 
 tokens = ( 
     'CHAR',
-    'OR', 'QUANT','DOT', 'BACKSLASH',
+    'OR', 'QUANT','DOT',
     'LPAREN','RPAREN'
 )
 
@@ -13,7 +13,6 @@ def t_CHAR(t):
 t_OR = r'\|'
 t_QUANT = r'\?|\+|\*'
 t_DOT = r'\.'
-t_BACKSLASH = r'\\'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
 
