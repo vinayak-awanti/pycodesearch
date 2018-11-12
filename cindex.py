@@ -8,4 +8,3 @@ if len(sys.argv) != 2:
 
 index_handler = IndexHandler.IndexHandler()
 index_handler.build(os.path.abspath(sys.argv[1]))
-    
