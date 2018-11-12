@@ -67,4 +67,4 @@ def parse(infifx_expr):
 	return outq.top()
 
 if __name__ == "__main__":
-    parse("Google")
+    parse("a(b|c+)d*")
