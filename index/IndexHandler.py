@@ -23,7 +23,6 @@ class IndexHandler:
             for file in files:
                 file = os.path.join(root, file)
                 self.add_file(file)
-                self.files.append(file)
         logging.info("index created %s", str(datetime.now() - start_time))
         with open(self.index_file, "wb") as fp:
             pickle.dump((self.index, self.files), fp)
@@ -41,6 +40,7 @@ class IndexHandler:
                 prev = prev[1:] + char
                 self.index[prev].add(self.fileid)
             self.fileid += 1
+            self.files.append(file)
         except UnicodeDecodeError:
             # logging.info("Couldn't read", file)
             pass
