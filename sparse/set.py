@@ -3,7 +3,7 @@
 import logging
 
 logging.basicConfig(level="INFO")
-
+    
 
 class Set(object):
     """Implementation of Sparse Set"""
