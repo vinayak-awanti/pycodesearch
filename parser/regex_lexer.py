@@ -3,7 +3,7 @@ import ply.lex as lex
 tokens = ( 
     'CHAR',
     'OR', 'QUANT','DOT', 'BACKSLASH',
-    'LPAREN','RPAREN', 'LSQUARE', 'RSQUARE'
+    'LPAREN','RPAREN'
 )
 
 def t_CHAR(t):
@@ -16,8 +16,6 @@ t_DOT = r'\.'
 t_BACKSLASH = r'\\'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
-t_LSQUARE  = r'\['
-t_RSQUARE  = r'\]'
 
 def t_error(t):
     print("Illegal character '%s'" % t.value[0])

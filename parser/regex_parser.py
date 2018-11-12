@@ -26,7 +26,6 @@ def p_term(p):
 def p_single_term(p):
     '''single_term : literal
                    | wildcard
-                   | char_class
                    | LPAREN regex RPAREN'''
     if len(p) == 4:
         p[0] = p[2]
@@ -40,10 +39,6 @@ def p_repetition(p):
 def p_literal(p):
     '''literal : CHAR'''
     p[0] = {"type": "literal", "value": p[1]}
-    
-def p_char_class(p):
-    '''char_class : LSQUARE regex RSQUARE'''
-    p[0] = p[1]
 
 def p_wildcard(p):
     '''wildcard : DOT'''
