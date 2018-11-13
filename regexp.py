@@ -6,8 +6,6 @@ QNone = 1 # Nothing matches
 QAnd = 2 # All in Sub and Trigram must match
 QOr = 3 # At least one in Sub or Trigram must match
 
-sys.setrecursionlimit(100)
-
 class Query:
 	"""
 	A Query is a matching machine, like a regular expression,
@@ -101,10 +99,6 @@ class Query:
 		q.Trigram = list(qs - common)
 		r.Trigram = list(rs - common)
 		common = list(common)
-		
-		# TODO: check if sort is necessary
-		# q.Trigram.sort()
-		# r.Trigram.sort()
 		
 		if len(common) > 0:
 			# If there were common trigrams, rewrite
@@ -301,7 +295,7 @@ def analyze(re):
 			info = analyze(re['value'])
 			if have(info.exact):
 				info.prefix = info.exact
-				info.suffix = copy(info.exact)
+				info.suffix = deepcopy(info.exact)
 				info.exact = []
 		elif re_quantifier == '*':
 			# We don't know anything, so assume the worst.
@@ -314,7 +308,6 @@ def analyze(re):
 			pass
 
 	info.simplify(False)
-	# print("analyze:", info)
 	return deepcopy(info)
 
 def fold(f, sub, zero):
@@ -328,7 +321,6 @@ def fold(f, sub, zero):
 	info = f(analyze(sub[0]), analyze(sub[1]))
 	for i in range(2, len(sub)):
 		info = f(info, analyze(sub[i]))
-	# print("fold:", info)
 	return deepcopy(info)
 
 # Exact sets are limited to maxExact strings.
@@ -354,7 +346,7 @@ class RegexpInfo(object):
 	"""
 	A regexpInfo summarizes the results of analyzing a regexp.
 	"""	
-	def __init__(self, canEmpty=False, exact=None, prefix=None, suffix=None, match = None):
+	def __init__(self, canEmpty=False, exact=None, prefix=None, suffix=None, match=None):
 		self.canEmpty = canEmpty
 		self.exact = [] if exact is None else exact
 		self.prefix = [] if prefix is None else prefix
@@ -379,8 +371,7 @@ class RegexpInfo(object):
 		clean(self.exact, False)
 		if len(self.exact) > maxExact or (minLen(self.exact) >= 3 and force) or (minLen(self.exact) >= 4):
 			self.addExact()
-			for i in range(len(self.exact)):
-				s = self.exact[i]
+			for s in self.exact:
 				n = len(s)
 				if n < 3:
 					add(self.prefix, s)
@@ -393,7 +384,6 @@ class RegexpInfo(object):
 		if not have(self.exact):
 			self.simplifySet(self.prefix, False)
 			self.simplifySet(self.suffix, True)
-		# print("break here")
 
 	def simplifySet(self, s, isSuffix):
 		"""
@@ -432,7 +422,7 @@ class RegexpInfo(object):
 		w = 0
 		f = str.endswith if isSuffix else str.startswith
 		for st in t:
-			if w == 0 or f(st, t[w-1]):
+			if w == 0 or not f(st, t[w-1]):
 				t[w] = st
 				w += 1
 		t = t[:w]
@@ -524,7 +514,7 @@ def concat(x, y):
 	# at maxSet just to keep the sets manageable.
 	if (not have(x.exact) and not have(y.exact) and size(x.suffix) <= maxSet and size(y.prefix) <= maxSet and minLen(x.suffix) + minLen(y.prefix) >= 3): 
 		xy.match = xy.match.andTrigrams(cross(x.suffix, y.prefix, False))
-	
+
 	xy.simplify(False)
 	return deepcopy(xy)
 
@@ -542,7 +532,7 @@ def alternate(x, y):
 		x.addExact()
 	elif have(y.exact):
 		xy.prefix = union(x.prefix, y.exact, False)
-		xy.suffix = union(x.suffix, copy(y.exact), True)
+		xy.suffix = union(x.suffix, deepcopy(y.exact), True)
 		y.addExact()
 	else:
 		xy.prefix = union(x.prefix, y.prefix, False)
@@ -679,7 +669,7 @@ if __name__ == "__main__":
 		(r'(a|ab)cde', '"cde" ("abc" "bcd")|("acd")'),
 		(r'(a|b|c|d)(ef|g|hi|j)', '+')
 	]
-
+	
 	for test in tests:
 		print("test:", test[0])
 		tree = regex_parser.parse(test[0])
