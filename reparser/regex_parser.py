@@ -1,3 +1,5 @@
+import sys
+sys.path.append('reparser')
 import ply.yacc as yacc
 from regex_lexer import tokens
 
