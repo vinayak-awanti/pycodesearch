@@ -12,10 +12,12 @@ from reparser.regex_parser import parse
 from search.QueryBuilder import regexp_query, Query, QAll
 
 if len(sys.argv) < 2:
-    print("usage: python csearch.py regex algorithm")
+    print("usage: python csearch.py regex algorithm showfiles")
     quit()
 
-if len(sys.argv) == 3:
+
+showfiles = True if len(sys.argv) == 4 and sys.argv[3] == "true" else False
+if len(sys.argv) >= 3:
     alg = sys.argv[2]
 reg = sys.argv[1]
 
@@ -25,7 +27,7 @@ except:
     print("invalid regular expression")
     quit()
 
-def full_regex_search(file_names):
+def full_regex_search(file_names, showfiles=False):
     logging.info("full regular expression search starting")
     st = time()
     ctr = 0
@@ -35,7 +37,8 @@ def full_regex_search(file_names):
                 data = mmap.mmap(f.fileno(), 0)
                 mo = re.search(sys.argv[1].encode('ASCII'), data)
                 if mo:
-                    # print("found in", filename, mo.span())
+                    if showfiles:
+                        print("found in", filename, mo.span())
                     ctr += 1
             except:
                 pass
@@ -70,5 +73,5 @@ logging.info("%s identified %d candidate files", alg, len(candid))
 
 file_names = query_handler.get_filenames(candid)
 
-ctr = full_regex_search(file_names)
-print(ctr, "files have have substring matching", reg)
+ctr = full_regex_search(file_names, showfiles)
+logging.info("%d files have substring matching %s", ctr, reg)
