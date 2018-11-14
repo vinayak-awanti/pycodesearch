@@ -1,4 +1,3 @@
-import sys
 from copy import deepcopy
 
 QAll = 0 # Everything matches
@@ -16,10 +15,10 @@ class Query:
 	the Query (using a trigram index) before running the comparatively
 	more expensive regexp machinery.
 	"""
-	def __init__(self, Op, Trigram=None, Sub=None):
-		self.Op = Op
-		self.Trigram = [] if Trigram is None else Trigram
-		self.Sub = [] if Sub is None else Sub
+	def __init__(self, o, trigram=None, sub=None):
+		self.op = o
+		self.trigram = [] if trigram is None else trigram
+		self.sub = [] if sub is None else sub
 
 	def q_and(self, r):
 		"""
@@ -48,10 +47,10 @@ class Query:
 		# print("andOr", q, opstr, r)
 		_ = opstr
 
-		if len(q.Trigram) == 0 and len(q.Sub) == 1:
-			q = q.Sub[0]
-		if len(r.Trigram) == 0 and len(r.Sub) == 1:
-			r = r.Sub[0]
+		if len(q.trigram) == 0 and len(q.sub) == 1:
+			q = q.sub[0]
+		if len(r.trigram) == 0 and len(r.sub) == 1:
+			r = r.sub[0]
 		
 		# Boolean simplification
 		# If q ⇒ r, q AND r ≡ q.
@@ -69,35 +68,35 @@ class Query:
 		
 		# Both q and r are QAnd or Qor.
 		# If they match or can be made to match, merge.
-		qAtom = len(q.Trigram) == 1 and len(q.Sub) == 0
-		rAtom = len(r.Trigram) == 1 and len(r.Sub) == 0
-		if q.Op == op and (r.Op == op or rAtom):
-			q.Trigram = union(q.Trigram, r.Trigram, False)
-			q.Sub.extend(r.Sub)
+		qAtom = len(q.trigram) == 1 and len(q.sub) == 0
+		rAtom = len(r.trigram) == 1 and len(r.sub) == 0
+		if q.op == op and (r.op == op or rAtom):
+			q.trigram = union(q.trigram, r.trigram, False)
+			q.sub.extend(r.sub)
 			return deepcopy(q)
-		if r.Op == op and qAtom:
-			r.Trigram = union(r.Trigram, q.Trigram, False)
+		if r.op == op and qAtom:
+			r.trigram = union(r.trigram, q.trigram, False)
 			return deepcopy(r)
 		if qAtom and rAtom:
-			q.Op = op
-			q.Trigram.extend(r.Trigram)
+			q.op = op
+			q.trigram.extend(r.trigram)
 			return deepcopy(q)
 
 		# If one matches the op, add the other to it.
-		if q.Op == op:
-			q.Sub.append(r)
+		if q.op == op:
+			q.sub.append(r)
 			return deepcopy(q)
-		if r.Op == op:
-			r.Sub.append(q)
+		if r.op == op:
+			r.sub.append(q)
 			return deepcopy(r)
 		
 		# We are creating an AND of ORs or an OR of ANDs.
 		# Factor out common trigrams, if any.
-		qs = set(q.Trigram)
-		rs = set(r.Trigram)
+		qs = set(q.trigram)
+		rs = set(r.trigram)
 		common = qs & rs
-		q.Trigram = list(qs - common)
-		r.Trigram = list(rs - common)
+		q.trigram = list(qs - common)
+		r.trigram = list(rs - common)
 		common = list(common)
 		
 		if len(common) > 0:
@@ -119,10 +118,10 @@ class Query:
 			# Add in factored trigrams.
 			otherOp = QAnd + QOr - op
 			t = Query(otherOp, common)
-			return t.andOr(s, t.Op)
+			return t.andOr(s, t.op)
 
 		# Otherwise just create the op.
-		return Query(op, Sub=[deepcopy(q), deepcopy(r)])
+		return Query(op, sub=[deepcopy(q), deepcopy(r)])
     
 	def implies(self, r):
 		"""
@@ -130,18 +129,18 @@ class Query:
 		It is okay for it to return false negatives.
 		"""
 		q = self
-		if q.Op == QNone or r.Op == QAll:
+		if q.op == QNone or r.op == QAll:
 			# False implies everything.
 			# Everything implies True.
 			return True
-		if q.Op == QAll or r.Op == QNone:
+		if q.op == QAll or r.op == QNone:
 			# True implies nothing.
 			# Nothing implies False
 			return False
-		if q.Op == QAnd or (q.Op == QOr and len(q.Trigram) == 1 and len(q.Sub) == 0):
-			return trigramsImply(q.Trigram, r)
+		if q.op == QAnd or (q.op == QOr and len(q.trigram) == 1 and len(q.sub) == 0):
+			return trigramsImply(q.trigram, r)
 		
-		if q.Op == QOr and r.Op == QOr and len(q.Trigram) > 0 and len(q.Sub) == 0 and isSubsetOf(q.Trigram, r.Trigram):
+		if q.op == QOr and r.op == QOr and len(q.trigram) > 0 and len(q.sub) == 0 and isSubsetOf(q.trigram, r.trigram):
 			return True
 		return False
 
@@ -151,10 +150,10 @@ class Query:
 		without changing the meaning.  It also simplifies if the node
 		"""
 		q = self
-		if q.Op != QAnd and q.Op != QOr:
+		if q.op != QAnd and q.op != QOr:
 			return
 
-		n = len(q.Sub) + len(q.Trigram)
+		n = len(q.sub) + len(q.trigram)
 
 		# AND/OR doing real work?  Can't rewrite.
 		if n > 1:
@@ -162,18 +161,18 @@ class Query:
 
 		# Nothing left in the AND/OR?
 		if n == 0:
-			if q.Op == QAnd:
-				q.Op = QAll
+			if q.op == QAnd:
+				q.op = QAll
 			else:
-				q.Op = QNone
+				q.op = QNone
 			return
 		
 		# Just a sub-node: throw away wrapper.
-		if len(q.Sub) == 1:
-			q = q.Sub[0]
+		if len(q.sub) == 1:
+			q = q.sub[0]
 
 		# Just a trigram: can use either op.
-		q.Op = op
+		q.op = op
     
 	def andTrigrams(self, t):
 		"""
@@ -204,15 +203,15 @@ class Query:
 		#     return "?"
 		# }
 		q = self
-		if q.Op == QNone:
+		if q.op == QNone:
 			return "-"
-		if q.Op == QAll:
+		if q.op == QAll:
 			return "+"
-		if len(q.Sub) == 0 and len(q.Trigram) == 1:
-			return '"{}"'.format(q.Trigram[0])
+		if len(q.sub) == 0 and len(q.trigram) == 1:
+			return '"{}"'.format(q.trigram[0])
 		
 		s, sjoin, end, tjoin = "", "", "", ""
-		if q.Op == QAnd:
+		if q.op == QAnd:
 			sjoin = " "
 			tjoin = " "
 		else:
@@ -220,33 +219,33 @@ class Query:
 			sjoin = ")|("
 			end = ")"
 			tjoin = "|"
-		for i, t in enumerate(q.Trigram):
+		for i, t in enumerate(q.trigram):
 			if i > 0:
 				s += tjoin
 			s += '"{}"'.format(t)
-		if len(q.Sub) > 0:
-			if len(q.Trigram) > 0:
+		if len(q.sub) > 0:
+			if len(q.trigram) > 0:
 				s += sjoin
-			s += q.Sub[0].__str__()
-			for i in range(1, len(q.Sub)):
-				s += sjoin + q.Sub[i].__str__()
+			s += q.sub[0].__str__()
+			for i in range(1, len(q.sub)):
+				s += sjoin + q.sub[i].__str__()
 		s += end
 		return s
 
 def trigramsImply(t, q):
-	if q.Op == QOr:
-		for qq in q.Sub:
+	if q.op == QOr:
+		for qq in q.sub:
 			if trigramsImply(t, qq):
 				return True
 		for i in range(len(t)):
-			if isSubsetOf([t[i]], q.Trigram):
+			if isSubsetOf([t[i]], q.trigram):
 				return True
 		return False
-	elif q.Op == QAnd:
-		for qq in q.Sub:
+	elif q.op == QAnd:
+		for qq in q.sub:
 			if not trigramsImply(t, qq):
 				return False
-		if not isSubsetOf(q.Trigram, t):
+		if not isSubsetOf(q.trigram, t):
 			return False
 		return True
 	return False

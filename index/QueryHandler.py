@@ -1,5 +1,5 @@
 from index.IndexHandler import IndexHandler
-from search.QueryBuilder import QueryType, Query
+from search.QueryBuilder import QAll, QAnd, QNone, QOr
 import logging
 from time import time
 
@@ -18,23 +18,31 @@ class QueryHandler:
     def list_or(self, lst1, lst2):
         return lst1 | lst2
 
-    # returns candidate fileids
-    def query(self, tri_query):
-        if tri_query.op == QueryType.QAll:
+    # returns candidate file ids
+    def query(self, q):
+        if q.op == QNone:
+            return set()
+        if q.op == QAll:
             return set(range(len(self.files)))
 
-        func = self.list_and if tri_query.op == QueryType.QAnd else self.list_or
-        if len(tri_query.tri) == 0:
-            lst = self.query(tri_query.sub[0])
-            for i in range(1, len(tri_query.sub)):
-                lst = func(lst, self.query(tri_query.sub[i]))
-        else:
-            for tri in tri_query.tri:
-                lst = self.index[tri]
-                break
-            for tri in tri_query.tri:
-                lst = func(lst, self.index[tri])
-        return lst
+        candid = None
+        for t in q.trigram:
+            candid = self.index[t]
+            break
+
+        f = self.list_and if q.op == QAnd else self.list_or
+        for t in q.trigram:
+            f(candid, self.index[t])
+
+        if candid is None:
+            for s in q.sub:
+                candid = self.query(s)
+
+        for s in q.sub:
+            f(candid, self.query(s))
+
+        # logging.info("candid: %s", str(candid))
+        return set() if candid is None else candid
 
     def get_filenames(self, fileids):
         return list(map(lambda x: self.files[x], fileids))
@@ -42,8 +50,6 @@ class QueryHandler:
 if __name__ == '__main__':
     start = time()
     query_handler = QueryHandler()
-    logging.info(query_handler.list_or([0, 2], 'oog'))
-    logging.info(query_handler.list_and([0, 2], 'Goo'))
     logging.info(time()-start)
     quit()
     while True:
