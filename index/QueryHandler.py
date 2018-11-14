@@ -22,26 +22,33 @@ class QueryHandler:
     def query(self, q):
         if q.op == QNone:
             return set()
+
         if q.op == QAll:
             return set(range(len(self.files)))
 
-        candid = None
-        for t in q.trigram:
-            candid = self.index[t]
-            break
+        if q.op == QAnd:
+            candid = None
+            for t in q.trigram:
+                candid = self.index[t]
+                break
 
-        f = self.list_and if q.op == QAnd else self.list_or
-        for t in q.trigram:
-            f(candid, self.index[t])
+            for t in q.trigram:
+                candid = self.list_and(candid, self.index[t])
 
-        if candid is None:
+            if candid is None:
+                for s in q.sub:
+                    candid = self.query(s)
+
             for s in q.sub:
-                candid = self.query(s)
+                candid = self.list_and(candid, self.query(s))
 
-        for s in q.sub:
-            f(candid, self.query(s))
+        if q.op == QOr:
+            candid = set()
+            for t in q.trigram:
+                candid = self.list_or(candid, self.index[t])
+            for s in q.sub:
+                candid = self.list_or(candid, self.query(s))
 
-        # logging.info("candid: %s", str(candid))
         return set() if candid is None else candid
 
     def get_filenames(self, fileids):
