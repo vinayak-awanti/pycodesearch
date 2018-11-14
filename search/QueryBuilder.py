@@ -2,49 +2,9 @@ import logging
 
 from copy import deepcopy
 
+from regexp import Query, QAll, QNone, QOr, QAnd
+
 logging.basicConfig(level="INFO")
-
-QNone = 0
-QAll = 1
-QOr = 2
-QAnd = 3
-
-class Query:
-    def __init__(self, op, trigram=None, sub=None):
-        self.op = op
-        self.trigram = [] if trigram == None else trigram
-        self.sub = [] if sub == None else sub
-
-    def __str__(self):
-        q = self
-        if q.op == QNone:
-            return "-"
-        if q.op == QAll:
-            return "+"
-        if len(q.sub) == 0 and len(q.trigram) == 1:
-            return '"{}"'.format(q.trigram[0])
-
-        s, sjoin, end, tjoin = "", "", "", ""
-        if q.op == QAnd:
-            sjoin = " "
-            tjoin = " "
-        else:
-            s = "("
-            sjoin = ")|("
-            end = ")"
-            tjoin = "|"
-        for i, t in enumerate(q.trigram):
-            if i > 0:
-                s += tjoin
-            s += '"{}"'.format(t)
-        if len(q.sub) > 0:
-            if len(q.trigram) > 0:
-                s += sjoin
-            s += q.sub[0].__str__()
-            for i in range(1, len(q.sub)):
-                s += sjoin + q.sub[i].__str__()
-        s += end
-        return s
 
 def cross(s, t):
     """
@@ -130,8 +90,8 @@ if __name__ == "__main__":
         (r'(z*(abc|def)z*)(z*(abc|def)z*)', '("abc"|"def")'),
         (r'(z*abcz*defz*)|(z*abcz*defz*)', '"abc" "def"'),
         (r'(z*abcz*defz*(ghi|jkl)z*)|(z*abcz*defz*(mno|prs)z*)', '"abc" "def" ("ghi"|"jkl"|"mno"|"prs")'),
-        (r'(z*(abcz*def)|(ghiz*jkl)z*)|(z*(mnoz*prs)|(tuvz*wxy)z*)',
-         '("abc" "def")|("ghi" "jkl")|("mno" "prs")|("tuv" "wxy")'),
+        (r'(z*(abcz*def)|(ghiz*jkl)z*)|(z*(mnoz*prs)|(tuvz*wxy)z*)'),
+        ('("abc" "def")|("ghi" "jkl")|("mno" "prs")|("tuv" "wxy")'),
         (r'(z*abcz*defz*)(z*(ghi|jkl)z*)', '"abc" "def" ("ghi"|"jkl")'),
         (r'(z*abcz*defz*)|(z*(ghi|jkl)z*)', '("ghi"|"jkl")|("abc" "def")'),
         (r'(a|ab)cde', '"cde" ("abc" "bcd")|("acd")'),
