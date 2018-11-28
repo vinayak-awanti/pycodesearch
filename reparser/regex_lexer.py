@@ -1,24 +1,29 @@
 import ply.lex as lex
 
-tokens = ( 
+tokens = (
     'CHAR',
-    'OR', 'QUANT','DOT',
-    'LPAREN','RPAREN'
+    'OR', 'QUANT', 'DOT',
+    'LPAREN', 'RPAREN'
 )
+
 
 def t_CHAR(t):
     r'[^|+?*\[\]{}()\\.]|\\[|+?*\[\]{}().]'
     t.value = t.value.strip('\\')
     return t
+
+
 t_OR = r'\|'
-t_QUANT = r'\?|\+|\*'
+t_QUANT = r'\?|\+|\*|\{\d+\}|\{\d+,\}|\{\d+\,\d+}'
 t_DOT = r'\.'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
 
+
 def t_error(t):
     print("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
+
 
 lexer = lex.lex()
 
