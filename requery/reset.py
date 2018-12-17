@@ -1,8 +1,6 @@
 import logging
-
 from copy import deepcopy
-
-from regexp import Query, QAll, QNone, QOr, QAnd
+from query import Query, allQuery
 
 logging.basicConfig(level="INFO")
 
@@ -14,7 +12,6 @@ def cross(s, t):
     p = {x + y for x in s for y in t}
     return p
 
-
 def union(s, t):
     """
 	union returns the union of s and t, reusing s's storage.
@@ -22,13 +19,11 @@ def union(s, t):
     s = s | t
     return deepcopy(s)
 
-
 def repeat(s):
     """
 	repeat
 	"""
     return s | {x + x for x in s}
-
 
 def analyze(tree):
     if tree == None:
@@ -54,21 +49,11 @@ def analyze(tree):
             s.add('')
         return s
 
-
 def regexp_query(tree):
     string_set = analyze(tree)
     logging.info("analyze identified string set: %s", str(string_set))
-    sub = []
-    for s in string_set:
-        n = len(s)
-        if n < 3:
-            return Query(QAll)
-        tri = []
-        for i in range(n - 2):
-            tri.append(s[i:i + 3])
-        tri = list(set(tri))
-        sub += [Query(QAnd, trigram=tri)]
-    return Query(QOr, sub=sub)
+    q = deepcopy(allQuery)
+    return q.andTrigrams(list(string_set))
 
 if __name__ == "__main__":
     from reparser.regex_parser import parse
