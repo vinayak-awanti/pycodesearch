@@ -10,9 +10,14 @@ logging.basicConfig(level="INFO")
 class Index:
     def __init__(self):
         self.index_file = "index.pkl"
-        self.index = defaultdict(set)
-        self.files = []
-        self.fileid = 0
+        if os.path.exists(self.index_file):
+            with open(self.index_file) as fp:
+                self.index, self.files = pickle.load(fp)
+            self.fileid = len(self.files)
+        else:
+            self.index = defaultdict(set)
+            self.files = []
+            self.fileid = 0
 
     def build(self, root):
         logging.info("index creation starting")
@@ -89,6 +94,9 @@ class Index:
 
     def get_filenames(self, fileids):
         return list(map(lambda x: self.files[x], fileids))
+
+    def get_filecount(self):
+        return len(self.files)
 
 if __name__ == "__main__":
     index = Index()
