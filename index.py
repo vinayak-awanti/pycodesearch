@@ -8,16 +8,21 @@ from collections import defaultdict
 logging.basicConfig(level="INFO")
 
 class Index:
-    def __init__(self):
+    def __init__(self, root = None):
         self.index_file = "index.pkl"
-        if os.path.exists(self.index_file):
+        if os.path.exists(self.index_file) and root == None:
             with open(self.index_file, "rb") as fp:
                 self.index, self.files = pickle.load(fp)
-            self.fileid = len(self.files)
+            self.fileid = len(self.files)    
         else:
             self.index = defaultdict(set)
             self.files = []
             self.fileid = 0
+            if root == None:
+                logging.info('Error give file name')
+                quit()
+            else:    
+                self.build(root)          
 
     def build(self, root):
         logging.info("index creation starting")
