@@ -11,7 +11,7 @@ class Index:
     def __init__(self):
         self.index_file = "index.pkl"
         if os.path.exists(self.index_file):
-            with open(self.index_file) as fp:
+            with open(self.index_file, "rb") as fp:
                 self.index, self.files = pickle.load(fp)
             self.fileid = len(self.files)
         else:
