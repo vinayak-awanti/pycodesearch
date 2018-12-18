@@ -41,5 +41,7 @@ pip-delete-this-directory.txt
 
 # Unit test
 .pytest_cache/
+
 reparser/parser.out
 reparser/parsetab.py
+index.pkl
