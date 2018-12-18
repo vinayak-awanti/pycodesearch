@@ -4,65 +4,65 @@ to a regex that represents a finite language
 so as to capture all possible trigrams
 """
 import re
-from reparser.regex_parser import parse
+import logging
 from copy import deepcopy
 from json import dumps
 
-user_query = "((ab)+)+"
+from reparser.regex_parser import parse
+logging.basicConfig(level="INFO")
 
-tree = parse(user_query)
-
-
-def convert(parse_tree):
+def convert(parse_tree: dict):
     if parse_tree["type"] == "repetition":
-        if parse_tree["quantifier"] == "*":
-            child1 = deepcopy(parse_tree)
-            child2 = deepcopy(parse_tree)
+        modifier_list = ["?"]
+        parse_tree["qauntifier"] = "".join(parse_tree["quantifier"].split())
+        if parse_tree["quantifier"] == "*":  # e* -> e?e?
+            modifier_list = ["?", "?"]
 
-            child1["quantifier"] = child2["quantifier"] = "?"
-            parse_tree["type"] = "concat"
-            parse_tree["value"] = [child1, child2]
-            del parse_tree["quantifier"]
+            # child1 = deepcopy(parse_tree)
+            # child2 = deepcopy(parse_tree)
+            #
+            # child1["quantifier"] = child2["quantifier"] = "?"
+            # parse_tree["type"] = "concat"
+            # parse_tree["value"] = [child1, child2]
+            # del parse_tree["quantifier"]
 
-        elif parse_tree["quantifier"] == "+":
-            child1 = deepcopy(parse_tree)
-            child2 = deepcopy(parse_tree)
+        elif parse_tree["quantifier"] == "+":  # e+ -> ee?
+            # parse_tree = modify_parse_tree(parse_tree, ["e", "?"])
+            modifier_list = ["e", "?"]
+            new_node = modify_parse_tree(parse_tree, ["e", "?"])
+            parse_tree.clear()
+            parse_tree.update(new_node)
+            # child1 = deepcopy(parse_tree)
+            # child2 = deepcopy(parse_tree)
+            #
+            # child1["type"] = child1["value"]["type"]
+            # child1["value"] = child1["value"]["value"]
+            # if child1["type"] != "repetition":
+            #     del child1["quantifier"]
+            #
+            # child2["quantifier"] = "?"
+            #
+            # parse_tree["type"] = "concat"
+            # parse_tree["value"] = [child1, child2]
+            # del parse_tree["quantifier"]
 
-            child1["type"] = child1["value"]["type"]
-            child1["value"] = child1["value"]["value"]
-            if child1["type"] != "repetition":
-                del child1["quantifier"]
-
-            child2["quantifier"] = "?"
-
-            parse_tree["type"] = "concat"
-            parse_tree["value"] = [child1, child2]
-            del parse_tree["quantifier"]
-
-        # TODO logic for {m}, {m,}, {m,n}
-        elif re.fullmatch(r"^{\d+}$", parse_tree["quantifier"]):
+        elif re.fullmatch(r"^{\d+}$", parse_tree["quantifier"]):  # e{m} -> e * min(m,3)
             m = int(parse_tree["quantifier"][1:-1])
-            times = min(m, 3)
+            modifier_list = ["e"]*min(m, 3)
 
-            if times == 0:
-                parse_tree["type"] = "literal"
-                parse_tree["value"] = ""
+        elif re.fullmatch(r"^{\d+,}$", parse_tree["quantifier"]):
+            m = int(parse_tree["quantifier"][1:-1])
+            modifier_list = ["e"]*min(m, 3) + ["?"]*max(0, 3-m)
 
-            elif times == 1:
-                parse_tree["value"] = parse_tree["value"]["value"]
-                if parse_tree["type"] != "repetition":
-                    del parse_tree["quantifier"]
+        elif re.fullmatch(r"^{\d+,\d+}$", parse_tree["quantifier"]):
+            # TODO: Correct this formula
+            m, n = map(int, re.findall(r"\d+", parse_tree["quantifier"]))
+            modifier_list = ["e"]*min(m, 3) + ["?"]*max(0, 3-max(n-m, 0))
+            modifier_list = ["e"] * min(m, 3) + ["?"] * max(0, min(3, n-m))
 
-            elif times == 2:
-                parse_tree["type"] = "concat"
-                del parse_tree["quantifier"]
-                child1 = deepcopy(parse_tree)
-                child2 = deepcopy(parse_tree)
-
-                parse_tree["value"] = [child1, child2]
-
-            elif times == 3:
-                pass
+        new_node = modify_parse_tree(parse_tree, modifier_list)
+        parse_tree.clear()
+        parse_tree.update(new_node)
 
     if type(parse_tree["value"]) == list:
         for sub_tree in parse_tree["value"]:
@@ -71,6 +71,38 @@ def convert(parse_tree):
         convert(parse_tree["value"])
 
 
+def modify_parse_tree(root: dict, modifier_list: list) -> dict:
+    """
+    Recursively modifies the parse tree based on the list.
+    modifier_list = ['e', 'e', '?'] if the expression e at root should be modified
+    to {concat : {e, concat: {e, {repetition: '?', value: e}}}}
+    :param root: root node of the parse tree
+    :param modifier_list: list with instructions
+    :return: new root
+    # TODO: Make this simpler by incorporating empty modifier_list
+    """
+    if len(modifier_list) == 1:
+        if modifier_list[0] == "?":
+            return {
+                "type": "repetition",
+                "quantifier": "?",
+                "value": deepcopy(root["value"])
+            }
+        else:
+            return deepcopy(root["value"])
+    else:
+        return {
+            "type": "concat",
+            "value": [
+                modify_parse_tree(root, modifier_list[:1]),
+                modify_parse_tree(root, modifier_list[1:])
+            ]
+        }
+
+user_query = "a{4,5}"
+tree = parse(user_query)
 print(dumps(tree, indent=2))
 convert(tree)
 print(dumps(tree, indent=2))
+
+
