@@ -37,7 +37,8 @@ def p_term(p):
 def p_single_term(p):
     '''single_term : literal
                    | wildcard
-                   | LPAREN regex RPAREN'''
+                   | LPAREN regex RPAREN
+                   | char_class'''
     if len(p) == 4:
         p[0] = p[2]
     else:
@@ -54,6 +55,10 @@ def p_literal(p):
 def p_wildcard(p):
     '''wildcard : DOT'''
     p[0] = {"type": "wildcard"}
+
+def p_char_class(p):
+    '''char_class : CHAR_CLASS'''
+    p[0] = {"type": "char_class", "value": p[1]}
 
 def p_error(error):
     print("parse error:", error)

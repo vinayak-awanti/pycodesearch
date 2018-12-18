@@ -3,7 +3,8 @@ import ply.lex as lex
 tokens = (
     'CHAR',
     'OR', 'QUANT', 'DOT',
-    'LPAREN', 'RPAREN'
+    'LPAREN', 'RPAREN', 'LSQUARE', 'RSQUARE',
+    'CHAR_CLASS'
 )
 
 
@@ -18,6 +19,7 @@ t_QUANT = r'\?|\+|\*|\{\d+\}|\{\d+,\}|\{\d+\,\d+}'
 t_DOT = r'\.'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
+t_CHAR_CLASS = r'\[[^\]]+\]'
 
 
 def t_error(t):
@@ -28,7 +30,7 @@ def t_error(t):
 lexer = lex.lex()
 
 if __name__ == "__main__":
-    lexer.input("a + b")
+    lexer.input("[a-zA-Z]")
     while True:
         tok = lexer.token()
         if not tok:
