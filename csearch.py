@@ -8,7 +8,6 @@ from time import time
 from tabulate import tabulate
 logging.basicConfig(level="INFO")
 
-# TODO - add your dependenices
 from copy import deepcopy
 from query import allQuery
 from requery.gcs import regexpQuery
@@ -17,7 +16,6 @@ from requery.xgr import xegerQuery
 from requery.free import freeQuery
 from index import Index
 from reparser.regex_parser import parse
-
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-a", "--algo", help="type of algorithm to be used", default="empty")
@@ -29,7 +27,6 @@ parser.add_argument("-s", "--show", help="show the candidate documents",action="
 args = parser.parse_args()
 reg = args.regex
 
-# os.system('figlet RESET')
 try:
     re.compile(reg)
 except:
@@ -111,8 +108,8 @@ else:
         query = regexp_query(regex_tree)
         dur = time() - st
     elif(args.algo == 'xeger'):
-        # TODO
-        x = 1
+        st = time()
+        query = xegerQuery(args.regex)
     elif(args.algo == 'free'):
         # TODO
         x = 1
@@ -121,7 +118,7 @@ else:
         flag = 0    
     else:
         logging.info('Invalid algorithm')   
-        flag = 0;
+        flag = 0
     if(flag):
         logging.info("%s took %s to construct trigram query", args.algo, str(dur))
         logging.info("trigram query: %s", str(query))
