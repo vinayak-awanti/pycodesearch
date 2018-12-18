@@ -33,4 +33,4 @@ def xegerQuery(query):
     return q
 
 if __name__ == '__main__':
-    xegerQuery(r"abc+de")
+    print(xegerQuery(r"abc+de"))

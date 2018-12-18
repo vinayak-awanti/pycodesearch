@@ -11,54 +11,32 @@ from json import dumps
 from reparser.regex_parser import parse
 logging.basicConfig(level="INFO")
 
+
 def convert(parse_tree: dict):
     if parse_tree["type"] == "repetition":
         modifier_list = ["?"]
-        parse_tree["qauntifier"] = "".join(parse_tree["quantifier"].split())
-        if parse_tree["quantifier"] == "*":  # e* -> e?e?
+        q = "".join(parse_tree["quantifier"].split())
+        if q == "*":  # e* -> e?e?
             modifier_list = ["?", "?"]
 
-            # child1 = deepcopy(parse_tree)
-            # child2 = deepcopy(parse_tree)
-            #
-            # child1["quantifier"] = child2["quantifier"] = "?"
-            # parse_tree["type"] = "concat"
-            # parse_tree["value"] = [child1, child2]
-            # del parse_tree["quantifier"]
-
-        elif parse_tree["quantifier"] == "+":  # e+ -> ee?
+        elif q == "+":  # e+ -> ee?
             # parse_tree = modify_parse_tree(parse_tree, ["e", "?"])
             modifier_list = ["e", "?"]
             new_node = modify_parse_tree(parse_tree, ["e", "?"])
             parse_tree.clear()
             parse_tree.update(new_node)
-            # child1 = deepcopy(parse_tree)
-            # child2 = deepcopy(parse_tree)
-            #
-            # child1["type"] = child1["value"]["type"]
-            # child1["value"] = child1["value"]["value"]
-            # if child1["type"] != "repetition":
-            #     del child1["quantifier"]
-            #
-            # child2["quantifier"] = "?"
-            #
-            # parse_tree["type"] = "concat"
-            # parse_tree["value"] = [child1, child2]
-            # del parse_tree["quantifier"]
 
-        elif re.fullmatch(r"^{\d+}$", parse_tree["quantifier"]):  # e{m} -> e * min(m,3)
-            m = int(parse_tree["quantifier"][1:-1])
+        elif re.fullmatch(r"^{\d+}$", q):  # e{m} -> e * min(m,3)
+            m, = map(int, re.findall(r"\d+", q))
             modifier_list = ["e"]*min(m, 3)
 
-        elif re.fullmatch(r"^{\d+,}$", parse_tree["quantifier"]):
-            m = int(parse_tree["quantifier"][1:-1])
+        elif re.fullmatch(r"^{\d+,}$", q):
+            m, = map(int, re.findall(r"\d+", q))
             modifier_list = ["e"]*min(m, 3) + ["?"]*max(0, 3-m)
 
-        elif re.fullmatch(r"^{\d+,\d+}$", parse_tree["quantifier"]):
-            # TODO: Correct this formula
-            m, n = map(int, re.findall(r"\d+", parse_tree["quantifier"]))
-            modifier_list = ["e"]*min(m, 3) + ["?"]*max(0, 3-max(n-m, 0))
-            modifier_list = ["e"] * min(m, 3) + ["?"] * max(0, min(3, n-m))
+        elif re.fullmatch(r"^{\d+,\d+}$", q):
+            m, n = map(int, re.findall(r"\d+", q))
+            modifier_list = ["e"] * min(m, 3) + ["?"] * min(n-m, 3-min(m, 3))
 
         new_node = modify_parse_tree(parse_tree, modifier_list)
         parse_tree.clear()
@@ -79,8 +57,8 @@ def modify_parse_tree(root: dict, modifier_list: list) -> dict:
     :param root: root node of the parse tree
     :param modifier_list: list with instructions
     :return: new root
-    # TODO: Make this simpler by incorporating empty modifier_list
     """
+    assert modifier_list
     if len(modifier_list) == 1:
         if modifier_list[0] == "?":
             return {
@@ -99,10 +77,9 @@ def modify_parse_tree(root: dict, modifier_list: list) -> dict:
             ]
         }
 
-user_query = "a{4,5}"
+
+user_query = "a{9,}"
 tree = parse(user_query)
 print(dumps(tree, indent=2))
 convert(tree)
 print(dumps(tree, indent=2))
-
-
