@@ -7,10 +7,11 @@ from collections import defaultdict
 
 logging.basicConfig(level="INFO")
 
+
 class Index:
-    def __init__(self, root = None):
+    def __init__(self, root=None):
         self.index_file = "index.pkl"
-        if os.path.exists(self.index_file) and root == None:
+        if os.path.exists(self.index_file) and root is None:
             with open(self.index_file, "rb") as fp:
                 self.index, self.files = pickle.load(fp)
             self.fileid = len(self.files)    
@@ -18,7 +19,7 @@ class Index:
             self.index = defaultdict(set)
             self.files = []
             self.fileid = 0
-            if root == None:
+            if root is None:
                 logging.info('Error give file name')
                 quit()
             else:    
@@ -57,15 +58,19 @@ class Index:
         return self.index
 
     # returns intersection of posting lists
-    def list_and(self, lst1, lst2):
+    @staticmethod
+    def list_and(lst1, lst2):
         return lst1 & lst2
     
     # returns union of posting lists
-    def list_or(self, lst1, lst2):
+    @staticmethod
+    def list_or(lst1, lst2):
         return lst1 | lst2
 
     # returns candidate file ids
     def get_candidate_fileids(self, q):
+
+        candid = None
         if q.op == Query.QNone:
             return set()
 
@@ -102,6 +107,7 @@ class Index:
 
     def get_filecount(self):
         return len(self.files)
+
 
 if __name__ == "__main__":
     index = Index()

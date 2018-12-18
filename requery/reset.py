@@ -1,32 +1,18 @@
 import logging
 from copy import deepcopy
-from query import Query, allQuery
+from query import allQuery
 
-logging.basicConfig(level="INFO")
 
 def cross(s, t):
-    """
-	cross returns the cross product of s and t.
-	"""
-    p = {}
-    p = {x + y for x in s for y in t}
-    return p
+    return {x + y for x in s for y in t}
 
-def union(s, t):
-    """
-	union returns the union of s and t, reusing s's storage.
-	"""
-    s = s | t
-    return deepcopy(s)
 
 def repeat(s):
-    """
-	repeat
-	"""
     return s | {x + x for x in s}
 
+
 def analyze(tree):
-    if tree == None:
+    if tree is None:
         return set()
 
     re_type = tree["type"]
@@ -38,7 +24,7 @@ def analyze(tree):
         return cross(analyze(tree["value"][0]), analyze(tree["value"][1]))
 
     if re_type == "union":
-        return union(analyze(tree["value"][0]), analyze(tree["value"][1]))
+        return analyze(tree["value"][0]) | analyze(tree["value"][1])
 
     if re_type == "repetition":
         re_quantifier = tree["quantifier"]
@@ -49,11 +35,13 @@ def analyze(tree):
             s.add('')
         return s
 
+
 def regexp_query(tree):
     string_set = analyze(tree)
     logging.info("analyze identified string set: %s", str(string_set))
     q = deepcopy(allQuery)
     return q.andTrigrams(list(string_set))
+
 
 if __name__ == "__main__":
     from reparser.regex_parser import parse
@@ -75,8 +63,7 @@ if __name__ == "__main__":
         (r'(z*(abc|def)z*)(z*(abc|def)z*)', '("abc"|"def")'),
         (r'(z*abcz*defz*)|(z*abcz*defz*)', '"abc" "def"'),
         (r'(z*abcz*defz*(ghi|jkl)z*)|(z*abcz*defz*(mno|prs)z*)', '"abc" "def" ("ghi"|"jkl"|"mno"|"prs")'),
-        (r'(z*(abcz*def)|(ghiz*jkl)z*)|(z*(mnoz*prs)|(tuvz*wxy)z*)'),
-        ('("abc" "def")|("ghi" "jkl")|("mno" "prs")|("tuv" "wxy")'),
+        (r'(z*(abcz*def)|(ghiz*jkl)z*)|(z*(mnoz*prs)|(tuvz*wxy)z*)','("abc" "def")|("ghi" "jkl")|("mno" "prs")|("tuv" "wxy")'),
         (r'(z*abcz*defz*)(z*(ghi|jkl)z*)', '"abc" "def" ("ghi"|"jkl")'),
         (r'(z*abcz*defz*)|(z*(ghi|jkl)z*)', '("ghi"|"jkl")|("abc" "def")'),
         (r'(a|ab)cde', '"cde" ("abc" "bcd")|("acd")'),
@@ -88,8 +75,8 @@ if __name__ == "__main__":
 
     for test in tests:
         print("test:", test[0])
-        tree = parse(test[0])
-        print("actual:", regexp_query(tree))
+        parse_tree = parse(test[0])
+        print("actual:", regexp_query(parse_tree))
         print("expected:", test[1])
 
     # while True:

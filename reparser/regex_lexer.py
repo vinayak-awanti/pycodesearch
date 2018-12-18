@@ -1,4 +1,4 @@
-import ply.lex as lex
+from ply.lex import lex
 
 tokens = (
     'CHAR',
@@ -8,6 +8,7 @@ tokens = (
 )
 
 
+# noinspection PySingleQuotedDocstring,PyPep8Naming
 def t_CHAR(t):
     r'[^|+?*\[\]{}()\\.]|\\[|+?*\[\]{}().]|[\n\t\r\v\f]'
     t.value = t.value.strip('\\')
@@ -27,7 +28,7 @@ def t_error(t):
     t.lexer.skip(1)
 
 
-lexer = lex.lex()
+lexer = lex()
 
 if __name__ == "__main__":
     lexer.input("[a-zA-Z]")

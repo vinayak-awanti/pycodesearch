@@ -1,17 +1,17 @@
 from copy import deepcopy
-from stringset import add, clean, isSubsetOf, minLen, union
+from stringset import clean, isSubsetOf, union
 
 
 class Query:
     """
-	A Query is a matching machine, like a regular expression,
-	that matches some text and not other text.  When we compute a
-	Query from a regexp, the Query is a conservative version of the
-	regexp: it matches everything the regexp would match, and probably
-	quite a bit more.  We can then filter target files by whether they match
-	the Query (using a trigram index) before running the comparatively
-	more expensive regexp machinery.
-	"""
+    A Query is a matching machine, like a regular expression,
+    that matches some text and not other text.  When we compute a
+    Query from a regexp, the Query is a conservative version of the
+    regexp: it matches everything the regexp would match, and probably
+    quite a bit more.  We can then filter target files by whether they match
+    the Query (using a trigram index) before running the comparatively
+    more expensive regexp machinery.
+    """
     QAll = 0  # Everything matches
     QNone = 1  # Nothing matches
     QAnd = 2  # All in Sub and Trigram must match
@@ -24,23 +24,23 @@ class Query:
 
     def q_and(self, r):
         """
-		and returns the query q AND r, possibly reusing q's and r's storage.  
-		q_and equivalent to "and" in regexp.go, and is a keyword in python.
-		"""
+        and returns the query q AND r, possibly reusing q's and r's storage.  
+        q_and equivalent to "and" in regexp.go, and is a keyword in python.
+        """
         return self.andOr(r, Query.QAnd)
 
     def q_or(self, r):
         """
-		or returns the query q OR r, possibly reusing q's and r's storage.
-		q_or equivalent to "or" in regexp.go, or is a keyword in python.
-		"""
+        or returns the query q OR r, possibly reusing q's and r's storage.
+        q_or equivalent to "or" in regexp.go, or is a keyword in python.
+        """
         return self.andOr(r, Query.QOr)
 
     def andOr(self, r, op):
         """
-		andOr returns the query q AND r or q OR r, possibly reusing q's and r's storage.
-		It works hard to avoid creating unnecessarily complicated structures.
-		"""
+        andOr returns the query q AND r or q OR r, possibly reusing q's and r's storage.
+        It works hard to avoid creating unnecessarily complicated structures.
+        """
         q = self
         # opstr is for debugging I guess.
         opstr = "&"
@@ -104,15 +104,15 @@ class Query:
         if len(common) > 0:
             # If there were common trigrams, rewrite
             #
-            #	(abc|def|ghi|jkl) AND (abc|def|mno|prs) =>
-            #		(abc|def) OR ((ghi|jkl) AND (mno|prs))
+            #    (abc|def|ghi|jkl) AND (abc|def|mno|prs) =>
+            #        (abc|def) OR ((ghi|jkl) AND (mno|prs))
             #
-            #	(abc&def&ghi&jkl) OR (abc&def&mno&prs) =>
-            #		(abc&def) AND ((ghi&jkl) OR (mno&prs))
+            #    (abc&def&ghi&jkl) OR (abc&def&mno&prs) =>
+            #        (abc&def) AND ((ghi&jkl) OR (mno&prs))
             #
             # Build up the right one of
-            #	(ghi|jkl) AND (mno|prs)
-            #	(ghi&jkl) OR (mno&prs)
+            #    (ghi|jkl) AND (mno|prs)
+            #    (ghi&jkl) OR (mno&prs)
             # Call andOr recursively in case q and r can now be simplified
             # (we removed some trigrams).
             s = q.andOr(r, op)
@@ -127,9 +127,9 @@ class Query:
 
     def implies(self, r):
         """
-		implies reports whether q implies r.
-		It is okay for it to return false negatives.
-		"""
+        implies reports whether q implies r.
+        It is okay for it to return false negatives.
+        """
         q = self
         if q.op == Query.QNone or r.op == Query.QAll:
             # False implies everything.
@@ -149,9 +149,9 @@ class Query:
 
     def maybeRewrite(self, op):
         """
-		maybeRewrite rewrites q to use op if it is possible to do so
-		without changing the meaning.  It also simplifies if the node
-		"""
+        maybeRewrite rewrites q to use op if it is possible to do so
+        without changing the meaning.  It also simplifies if the node
+        """
         q = self
         if q.op != Query.QAnd and q.op != Query.QOr:
             return
@@ -179,13 +179,13 @@ class Query:
 
     def andTrigrams(self, t):
         """
-		andTrigrams returns q AND the OR of the AND of the trigrams present in each string.
-		"""
+        andTrigrams returns q AND the OR of the AND of the trigrams present in each string.
+        """
         q = self
         # If there is a short string, we can't guarantee
         # that any trigrams must be present, so use ALL.
         # q AND ALL = q.
-        if minLen(t) < 3:
+        if len(t) == 0 or min(len(x) for x in t) < 3:
             return deepcopy(q)
 
         # print("andTrigrams", t)
@@ -193,7 +193,7 @@ class Query:
         for tt in t:
             trig = []
             for i in range(0, len(tt) - 2):
-                add(trig, tt[i:i + 3])
+                trig.append(tt[i:i + 3])
             clean(trig, False)
             # print(tt, "trig", trig)
             q_or = q_or.q_or(Query(Query.QAnd, trig))

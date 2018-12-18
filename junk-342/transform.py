@@ -78,7 +78,7 @@ def modify_parse_tree(root: dict, modifier_list: list) -> dict:
         }
 
 
-user_query = "a{9,}"
+user_query = "a.*"
 tree = parse(user_query)
 print(dumps(tree, indent=2))
 convert(tree)
