@@ -13,7 +13,7 @@ from copy import deepcopy
 from query import allQuery
 from requery.gcs import regexpQuery
 from requery.reset import regexp_query
-from requery.xeger import xegerQuery
+from requery.xgr import xegerQuery
 from requery.free import freeQuery
 from index import Index
 from reparser.regex_parser import parse
@@ -71,13 +71,14 @@ if(args.index):
 def demo():
     logging.info("Comparison of various codesearch algorithms\n")
     lis = [] 
-    algo = ['Brute Force', 'Google Code Search', 'RESET']
-    func = [deepcopy, allQuery,regexpQuery, regex_tree, regexp_query, regex_tree]
-    for i in range(3):
+    algo = ['Brute Force', 'Google Code Search', 'RESET', 'XEGER']
+    func = [deepcopy, allQuery,regexpQuery, regex_tree, regexp_query, regex_tree, xegerQuery, args.regex]
+    for i in range(4):
         try:
             lis.append([algo[i]])
             st = time()
             query = func[2*i](func[2*i + 1])
+            logging.info(" query generated for %s %s", algo[i], query)
             dur_q = time() - st
             index = Index()
             tot = index.get_filecount()
@@ -87,12 +88,7 @@ def demo():
             # print(i, len(candid), ctr)
             lis[-1].extend([str(round((len(candid)*100)/tot, 2)) + ' %', str(round(dur_q, 5))+ ' seconds', str(round(dur_s ,5)) + ' seconds', ctr])
         except:
-            pass
-    try:        
-        lis.append(xegerQuery(args.regex))
-        lis.append(freeQuery(args.regex))        
-    except:
-        pass    
+            pass   
     print('\n')        
     print(tabulate(lis, headers=['Algorithm', 'Space', 'Query Time', 'Search Time', 'Found in'], tablefmt='orgtbl'))
         
