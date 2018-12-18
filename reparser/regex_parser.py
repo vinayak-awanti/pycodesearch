@@ -1,4 +1,6 @@
 import ply.yacc as yacc
+# noinspection PyUnresolvedReferences
+from reparser.regex_lexer import tokens
 
 
 # noinspection PySingleQuotedDocstring
@@ -88,6 +90,7 @@ def parse(user_regex_query):
     
 
 if __name__ == "__main__":
+    print("hello")
     from json import dumps
     while True:
         s = input()

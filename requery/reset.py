@@ -1,6 +1,7 @@
 import logging
 from copy import deepcopy
 from query import allQuery
+from reparser.regex_parser import parse
 
 
 def cross(s, t):
@@ -44,7 +45,6 @@ def regexp_query(tree):
 
 
 if __name__ == "__main__":
-    from reparser.regex_parser import parse
 
     tests = [
         (r'Abcdef', '"Abc" "bcd" "cde" "def"'),
@@ -63,7 +63,7 @@ if __name__ == "__main__":
         (r'(z*(abc|def)z*)(z*(abc|def)z*)', '("abc"|"def")'),
         (r'(z*abcz*defz*)|(z*abcz*defz*)', '"abc" "def"'),
         (r'(z*abcz*defz*(ghi|jkl)z*)|(z*abcz*defz*(mno|prs)z*)', '"abc" "def" ("ghi"|"jkl"|"mno"|"prs")'),
-        (r'(z*(abcz*def)|(ghiz*jkl)z*)|(z*(mnoz*prs)|(tuvz*wxy)z*)','("abc" "def")|("ghi" "jkl")|("mno" "prs")|("tuv" "wxy")'),
+        (r'(z*(abcz*def)|(ghiz*jkl)z*)|(z*(mnoz*prs)|(tuvz*wxy)z*)', '("abc" "def")|("ghi" "jkl")|("mno" "prs")|("tuv" "wxy")'),
         (r'(z*abcz*defz*)(z*(ghi|jkl)z*)', '"abc" "def" ("ghi"|"jkl")'),
         (r'(z*abcz*defz*)|(z*(ghi|jkl)z*)', '("ghi"|"jkl")|("abc" "def")'),
         (r'(a|ab)cde', '"cde" ("abc" "bcd")|("acd")'),

@@ -21,17 +21,13 @@ def xegerQuery(query):
         total += 1
         trigrams = list(set(get_trigrams(res)))
         c.update(trigrams)
-    
-    tri = []
-    for trigram in c:
-        if c[trigram] == total:
-            tri.append(trigram)
-    
+
+    tri = list(filter(lambda x: c[x] == total, c.keys()))
+
     if len(tri) == 0:
         q = Query(Query.QAll)       
     else:
         q = Query(Query.QAnd, trigram=tri)
-    
     return q
 
 

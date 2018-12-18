@@ -1,4 +1,4 @@
-from ply.lex import lex
+import ply.lex as lex
 
 tokens = (
     'CHAR',
@@ -28,7 +28,7 @@ def t_error(t):
     t.lexer.skip(1)
 
 
-lexer = lex()
+lexer = lex.lex()
 
 if __name__ == "__main__":
     lexer.input("[a-zA-Z]")
