@@ -3,7 +3,7 @@ import ply.lex as lex
 tokens = (
     'CHAR',
     'OR', 'QUANT', 'DOT',
-    'LPAREN', 'RPAREN', 'LSQUARE', 'RSQUARE',
+    'LPAREN', 'RPAREN',
     'CHAR_CLASS'
 )
 
