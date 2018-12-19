@@ -15,7 +15,7 @@ def xegerQuery(query):
     c = Counter()
     total = 0
     
-    for i in range(1, 4**len(query)):
+    for i in range(1, min(4**len(query),1000)):
         x = Xeger(limit=i)
         res = x.xeger(query)
         total += 1
