@@ -193,7 +193,8 @@ class Query:
         for tt in t:
             trig = []
             for i in range(0, len(tt) - 2):
-                trig.append(tt[i:i + 3])
+                if '.' not in tt[i:i + 3]:
+                    trig.append(tt[i:i + 3])
             clean(trig, False)
             # print(tt, "trig", trig)
             q_or = q_or.q_or(Query(Query.QAnd, trig))
