@@ -70,9 +70,9 @@ if args.index:
 def demo():
     logging.info("Comparison of various codesearch algorithms\n")
     lis = []
-    algo = ['Brute Force', 'Google Code Search', 'RESET', 'XEGER']
-    func = [deepcopy, allQuery, regexpQuery, regex_tree, regexp_query, regex_tree, xegerQuery, args.regex]
-    for i in range(4):
+    algo = ['Brute Force', 'Google Code Search', 'RESET', 'XEGER', 'FREE']
+    func = [deepcopy, allQuery, regexpQuery, regex_tree, regexp_query, regex_tree, xegerQuery, args.regex, freeQuery, regex_tree]
+    for i in range(5):
         try:
             lis.append([algo[i]])
             st = time()
