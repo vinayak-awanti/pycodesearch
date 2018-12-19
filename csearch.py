@@ -28,7 +28,7 @@ args = parser.parse_args()
 reg = args.regex
 
 try:
-    re.compile(reg)
+    compiled_regex = re.compile(reg)
 except:
     logging.info("Invalid regular expression")
     quit()
@@ -44,14 +44,14 @@ def full_regex_search(file_names, regex):
     st = time()
     ctr = 0
     for filename in file_names:
-        with open(filename, 'r+') as f:
-            try:
-                data = mmap.mmap(f.fileno(), 0)
-                mo = re.search(regex.encode('ASCII'), data)
+        try:
+            with open(filename, 'r+') as f:
+                # data = mmap.mmap(f.fileno(), 0)
+                mo = compiled_regex.search(f.read())
                 if mo:
                     ctr += 1
-            except:
-                pass
+        except Exception as e:
+            pass
     logging.info("full regular expression search took %s", str(time() - st))
     return ctr, time() - st
 
@@ -88,9 +88,7 @@ def demo():
             lis[-1].extend([str(round((len(candid) * 100) / tot, 2)) + ' %', str(round(dur_q, 5)) + ' seconds',
                             str(round(dur_s, 5)) + ' seconds', ctr])
         except Exception as e:
-            logging.error("error %s", e)
-            logging.error(algo[i])
-            # pass
+            pass
     print('\n')
     print(tabulate(lis, headers=['Algorithm', 'Space', 'Query Time', 'Search Time', 'Found in'], tablefmt='orgtbl'))
 
@@ -99,7 +97,11 @@ if args.algo == 'empty':
     print('Please read usage --help')
     quit()
 else:
-    algo_dict = {'bruteforce' : [deepcopy, allQuery], 'gcs' : [regexpQuery, regex_tree], 'reset' : [regexp_query, regex_tree], 'xeger' : [xegerQuery, args.regex], 'free': [freeQuery, regex_tree]}
+    algo_dict = {'bruteforce' : [deepcopy, allQuery],
+                 'gcs' : [regexpQuery, regex_tree],
+                 'reset' : [regexp_query, regex_tree],
+                 'xeger' : [xegerQuery, args.regex],
+                 'free': [freeQuery, regex_tree]}
     st = time()
     if args.algo in algo_dict:
         query = algo_dict[args.algo][0](algo_dict[args.algo][1])

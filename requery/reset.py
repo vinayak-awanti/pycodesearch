@@ -1,3 +1,4 @@
+import re
 import logging
 from copy import deepcopy
 from query import allQuery
@@ -10,6 +11,73 @@ def cross(s, t):
 
 def repeat(s):
     return s | {x + x for x in s}
+
+
+def convert(parse_tree: dict):
+    if parse_tree["type"] == "repetition":
+        modifier_list = ["?"]
+        q = "".join(parse_tree["quantifier"].split())
+        if q == "*":  # e* -> e?e?
+            modifier_list = ["?", "?"]
+
+        elif q == "+":  # e+ -> ee?
+            # parse_tree = modify_parse_tree(parse_tree, ["e", "?"])
+            modifier_list = ["e", "?"]
+
+        elif re.fullmatch(r"^{\d+}$", q):  # e{m} -> e * min(m,3)
+            m, = map(int, re.findall(r"\d+", q))
+            modifier_list = ["e"]*min(m, 3)
+
+        elif re.fullmatch(r"^{\d+,}$", q):
+            m, = map(int, re.findall(r"\d+", q))
+            modifier_list = ["e"]*min(m, 3) + ["?"]*max(0, 3-m)
+
+        elif re.fullmatch(r"^{\d+,\d+}$", q):
+            m, n = map(int, re.findall(r"\d+", q))
+            modifier_list = ["e"] * min(m, 3) + ["?"] * min(n-m, 3-min(m, 3))
+
+        new_node = modify_parse_tree(parse_tree, modifier_list)
+        parse_tree.clear()
+        parse_tree.update(new_node)
+
+    elif parse_tree["type"] == "char_class":
+        parse_tree["type"] = "literal"
+        parse_tree["value"] = "."
+
+    if type(parse_tree["value"]) == list:
+        for sub_tree in parse_tree["value"]:
+            convert(sub_tree)
+    elif type(parse_tree["value"]) == dict:
+        convert(parse_tree["value"])
+
+
+def modify_parse_tree(root: dict, modifier_list: list) -> dict:
+    """
+    Recursively modifies the parse tree based on the list.
+    modifier_list = ['e', 'e', '?'] if the expression e at root should be modified
+    to {concat : {e, concat: {e, {repetition: '?', value: e}}}}
+    :param root: root node of the parse tree
+    :param modifier_list: list with instructions
+    :return: new root
+    """
+    assert modifier_list
+    if len(modifier_list) == 1:
+        if modifier_list[0] == "?":
+            return {
+                "type": "repetition",
+                "quantifier": "?",
+                "value": deepcopy(root["value"])
+            }
+        else:
+            return deepcopy(root["value"])
+    else:
+        return {
+            "type": "concat",
+            "value": [
+                modify_parse_tree(root, modifier_list[:1]),
+                modify_parse_tree(root, modifier_list[1:])
+            ]
+        }
 
 
 def analyze(tree):
@@ -38,6 +106,7 @@ def analyze(tree):
 
 
 def regexp_query(tree):
+    convert(tree)
     string_set = analyze(tree)
     logging.info("analyze identified string set: %s", str(string_set))
     q = deepcopy(allQuery)
@@ -75,8 +144,7 @@ if __name__ == "__main__":
 
     for test in tests:
         print("test:", test[0])
-        parse_tree = parse(test[0])
-        print("actual:", regexp_query(parse_tree))
+        print("actual:", regexp_query(parse(test[0])))
         print("expected:", test[1])
 
     # while True:
