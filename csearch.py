@@ -35,7 +35,7 @@ except:
 
 regex_tree = parse(reg)
 flag = 1
-index = Index()
+# index = Index()
 logging.info("constructing trigram query")
 
 
@@ -53,11 +53,10 @@ def full_regex_search(file_names, regex):
             except:
                 pass
     logging.info("full regular expression search took %s", str(time() - st))
-    return (ctr, time() - st)
+    return ctr, time() - st
 
-
-if (args.index):
-    if (args.directory == 'empty'):
+if args.index:
+    if args.directory == 'empty':
         logging.info('Please read usage --help')
         quit()
     else:
@@ -98,30 +97,24 @@ if args.algo == 'empty':
     print('Please read usage --help')
     quit()
 else:
+    st = time()
     if args.algo == 'bruteforce':
-        st = time()
         query = deepcopy(allQuery)
-        dur = time() - st
     elif args.algo == 'gcs':
-        st = time()
         query = regexpQuery(regex_tree)
-        dur = time() - st
     elif args.algo == 'reset':
-        st = time()
         query = regexp_query(regex_tree)
-        dur = time() - st
     elif args.algo == 'xeger':
-        st = time()
         query = xegerQuery(args.regex)
     elif args.algo == 'free':
-        # TODO
-        x = 1
+        query = freeQuery(regex_tree)
     elif args.algo == 'demo':
         demo()
         flag = 0
     else:
         logging.info('Invalid algorithm')
         flag = 0
+    dur = time()-st
     if flag:
         logging.info("%s took %s to construct trigram query", args.algo, str(dur))
         logging.info("trigram query: %s", str(query))

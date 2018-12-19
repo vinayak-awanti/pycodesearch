@@ -20,7 +20,7 @@ class Index:
             self.files = []
             self.fileid = 0
             if root is None:
-                logging.info('Error give file name')
+                logging.error('Error give file name')
                 quit()
             else:    
                 self.build(root)          
