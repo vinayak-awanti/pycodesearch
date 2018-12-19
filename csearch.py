@@ -97,17 +97,10 @@ if args.algo == 'empty':
     print('Please read usage --help')
     quit()
 else:
+    algo_dict = {'bruteforce' : [deepcopy, allQuery], 'gcs' : [regexpQuery, regex_tree], 'reset' : [regexp_query, regex_tree], 'xeger' : [xegerQuery, args.regex], 'free': [freeQuery, regex_tree]}
     st = time()
-    if args.algo == 'bruteforce':
-        query = deepcopy(allQuery)
-    elif args.algo == 'gcs':
-        query = regexpQuery(regex_tree)
-    elif args.algo == 'reset':
-        query = regexp_query(regex_tree)
-    elif args.algo == 'xeger':
-        query = xegerQuery(args.regex)
-    elif args.algo == 'free':
-        query = freeQuery(regex_tree)
+    if args.algo in algo_dict:
+        query = algo_dict[args.algo][0](algo_dict[args.algo][1])
     elif args.algo == 'demo':
         demo()
         flag = 0
