@@ -87,8 +87,10 @@ def demo():
             # print(i, len(candid), ctr)
             lis[-1].extend([str(round((len(candid) * 100) / tot, 2)) + ' %', str(round(dur_q, 5)) + ' seconds',
                             str(round(dur_s, 5)) + ' seconds', ctr])
-        except:
-            pass
+        except Exception as e:
+            logging.error("error %s", e)
+            logging.error(algo[i])
+            # pass
     print('\n')
     print(tabulate(lis, headers=['Algorithm', 'Space', 'Query Time', 'Search Time', 'Found in'], tablefmt='orgtbl'))
 
