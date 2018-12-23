@@ -71,7 +71,7 @@ def p_literal(p):
 # noinspection PySingleQuotedDocstring
 def p_wildcard(p):
     '''wildcard : DOT'''
-    p[0] = {"type": "wildcard"}
+    p[0] = {"type": "literal", "value": "ω"}
 
 
 # noinspection PySingleQuotedDocstring

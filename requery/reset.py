@@ -42,7 +42,7 @@ def convert(parse_tree: dict):
 
     elif parse_tree["type"] == "char_class":
         parse_tree["type"] = "literal"
-        parse_tree["value"] = "."
+        parse_tree["value"] = "ω"
 
     if type(parse_tree["value"]) == list:
         for sub_tree in parse_tree["value"]:

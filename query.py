@@ -193,7 +193,7 @@ class Query:
         for tt in t:
             trig = []
             for i in range(0, len(tt) - 2):
-                if '.' not in tt[i:i + 3]:
+                if 'ω' not in tt[i:i + 3]:
                     trig.append(tt[i:i + 3])
             clean(trig, False)
             # print(tt, "trig", trig)
