@@ -50,6 +50,8 @@ def full_regex_search(file_names, regex):
                 mo = compiled_regex.search(f.read())
                 if mo:
                     ctr += 1
+                    if args.show :
+                    	logging.info(" Found in -  %s", filename)
         except Exception as e:
             pass
     logging.info("full regular expression search took %s", str(time() - st))
@@ -122,10 +124,6 @@ else:
         logging.info("%s identified %d candidate files", args.algo, len(candid))
 
         file_names = index.get_filenames(candid)
-
-        if args.show:
-            for file in file_names:
-                logging.info(file)
 
         ctr, x = full_regex_search(file_names, args.regex)
         logging.info("%d files have substring matching %s", ctr, reg)
