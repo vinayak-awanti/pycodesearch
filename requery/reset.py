@@ -3,7 +3,7 @@ import logging
 from copy import deepcopy
 from query import allQuery
 from reparser.regex_parser import parse
-
+from query import Query, allQuery
 
 def cross(s, t):
     return {x + y for x in s for y in t}
@@ -109,8 +109,14 @@ def regexp_query(tree):
     convert(tree)
     string_set = analyze(tree)
     logging.info("analyze identified string set: %s", str(string_set))
-    q = deepcopy(allQuery)
-    return q.andTrigrams(list(string_set))
+    sub = []
+    for tt in string_set:
+        trig = []
+        for i in range(0, len(tt) - 2):
+            if 'ω' not in tt[i:i + 3]:
+                trig.append(tt[i:i + 3])
+        sub.append(Query(Query.QAnd, trig))
+    return Query(Query.QOr, sub=sub)
 
 
 if __name__ == "__main__":

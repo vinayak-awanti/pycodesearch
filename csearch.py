@@ -6,7 +6,7 @@ import logging
 import argparse
 from time import time
 from tabulate import tabulate
-
+import pickle
 from copy import deepcopy
 from query import allQuery
 from requery.gcs import regexpQuery
@@ -17,12 +17,12 @@ from index import Index
 from reparser.regex_parser import parse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-a", "--algo", help="type of algorithm to be used", default="empty")
-parser.add_argument("regex", help="regex to search", default="empty")
-parser.add_argument("-i", "--index", help="build a new index file", action="store_true")
-parser.add_argument("-d", "--directory", help="name of the directory", default='empty')
-parser.add_argument("-s", "--show", help="show the candidate documents", action="store_true")
-
+parser.add_argument("-a", "--algo", help = "type of algorithm to be used", default="empty")
+parser.add_argument("regex", help = "regex to search", default="empty")
+parser.add_argument("-i", "--index", help = "build a new index file", action="store_true")
+parser.add_argument("-d", "--directory", help = "name of the directory", default='empty')
+parser.add_argument("-s", "--show", help = "show the candidate documents", action="store_true")
+parser.add_argument("-t", "--test", help = "Test", action="store_true")
 logging.basicConfig(level="INFO")
 args = parser.parse_args()
 reg = args.regex
@@ -37,7 +37,6 @@ regex_tree = parse(reg)
 flag = 1
 # index = Index()
 logging.info("constructing trigram query")
-
 
 def full_regex_search(file_names, regex):
     logging.info("full regular expression search starting")
@@ -68,6 +67,26 @@ if args.index:
             logging.info('No such file exists')
             quit()
 
+if args.test:
+    try:
+        os.system("rm my.pkl")
+    except:
+        pass
+
+    regexs = ["a(b+|c+)d", "(abc|cba)def", "abc+de", "ab(cd)*ef", "def|lambda", "a*(bcd|efg)", "(a|b|c)+@(a|b|c)+(\.(a|b|c))+"]
+
+    for i in range(len(regexs)):
+        os.system("python3 csearch.py -a demo " + '"' + regexs[i] + '"')
+        print(i+1, "done")
+    with open("my.pkl", 'rb') as f:
+        x = pickle.load(f)
+
+    for i in range(1,4):
+        for j in range(5):
+            x[j][i] /= len(regexs)
+
+    print(tabulate(x, headers=['Algorithm', 'Space', 'Query Time', 'Search Time', 'Found in'], tablefmt='orgtbl'))
+    quit()
 
 def demo():
     logging.info("Comparison of various codesearch algorithms\n")
@@ -83,6 +102,7 @@ def demo():
             dur_q = time() - st
             index = Index()
             tot = index.get_filecount()
+            logging.info("%s identified %d candidate files", algo[i], tot)
             candid = index.get_candidate_fileids(query)
             file_names = index.get_filenames(candid)
             ctr, dur_s = full_regex_search(file_names, args.regex)
@@ -92,8 +112,24 @@ def demo():
         except Exception as e:
             pass
     print('\n')
+    test(lis)
     print(tabulate(lis, headers=['Algorithm', 'Space', 'Query Time', 'Search Time', 'Found in'], tablefmt='orgtbl'))
 
+
+def test(lis):
+    try :
+        with open('my.pkl', 'rb') as f:
+            nlis = pickle.load(f)
+    except:
+        nlis = [['Brute Force',0,0,0], ['Google Code Search',0,0,0], ['RESET',0,0,0], ['XEGER',0,0,0], ['FREE',0,0,0]]        
+    
+    for i in range(1,4):
+        for j in range(5):
+            y = lis[j][i].split(' ')
+            nlis[j][i] += float(y[0]) 
+    
+    with open('my.pkl', 'wb') as f:
+        pickle.dump(nlis, f)               
 
 if args.algo == 'empty':
     print('Please read usage --help')
