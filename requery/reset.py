@@ -115,8 +115,12 @@ def regexp_query(tree):
         for i in range(0, len(tt) - 2):
             if 'ω' not in tt[i:i + 3]:
                 trig.append(tt[i:i + 3])
-        sub.append(Query(Query.QAnd, trig))
-    return Query(Query.QOr, sub=sub)
+        if len(trig):
+            sub.append(Query(Query.QAnd, trig))
+    q = Query(Query.QOr, sub=sub)
+    if len(sub) == 0:
+        q = allQuery
+    return q
 
 
 if __name__ == "__main__":
