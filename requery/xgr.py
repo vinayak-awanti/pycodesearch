@@ -15,14 +15,14 @@ def xegerQuery(query):
     c = Counter()
     total = 0
     
-    for i in range(1, min(4**len(query),1000)):
+    for i in range(1, min(4**len(query), 1000)):
         x = Xeger(limit=i)
         res = x.xeger(query)
         total += 1
         trigrams = list(set(get_trigrams(res)))
         c.update(trigrams)
 
-    tri = list(filter(lambda x: c[x] == total, c.keys()))
+    tri = list(filter(lambda t: c[t] == total, c.keys()))
 
     if len(tri) == 0:
         q = Query(Query.QAll)       

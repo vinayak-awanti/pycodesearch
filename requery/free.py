@@ -1,10 +1,11 @@
-import logging
-from query import allQuery
 from copy import deepcopy
 from reparser.regex_parser import parse
-from query import Query, allQuery, noneQuery
+from query import Query, allQuery
+
+
 def cross(s, t):
     return {x + y for x in s for y in t}
+
 
 def get_trigrams(raw_str):
     prev = raw_str[:3]
@@ -13,6 +14,7 @@ def get_trigrams(raw_str):
     for j in range(3, len(raw_str)):
         prev = prev[1:] + raw_str[j]
         yield prev
+
 
 # print(list(get_trigrams("ab")))
 

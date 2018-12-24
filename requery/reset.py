@@ -1,9 +1,9 @@
 import re
 import logging
 from copy import deepcopy
-from query import allQuery
 from reparser.regex_parser import parse
 from query import Query, allQuery
+
 
 def cross(s, t):
     return {x + y for x in s for y in t}
@@ -97,11 +97,9 @@ def analyze(tree):
 
     if re_type == "repetition":
         re_quantifier = tree["quantifier"]
+        assert re_quantifier == "?"  # after transformation the regex must have only ?
         s = analyze(tree["value"])
-        if re_quantifier == '+' or re_quantifier == '*':
-            s = repeat(s)
-        if re_quantifier == '?' or re_quantifier == '*':
-            s.add('')
+        s.add('')
         return s
 
 
